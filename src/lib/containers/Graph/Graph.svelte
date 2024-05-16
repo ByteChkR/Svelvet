@@ -219,7 +219,6 @@
 				s,
 				t
 		);
-		console.log("Dispatching cursor event", name, "Translation", t, "Scale", s, "Dimensions",dims,"Cursor", c);
 		dispatch(name, 
 			c
 		);
