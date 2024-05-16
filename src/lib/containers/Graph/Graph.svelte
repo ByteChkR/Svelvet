@@ -20,6 +20,8 @@
 
 <script lang="ts">
 	// defining props that the Graph component expects when it is used, type annotations added
+	import {calculateRelativeCursor} from "$lib/utils";
+
 	export let graph: Graph;
 	export let width: number;
 	export let height: number;
@@ -202,6 +204,26 @@
 		graph.dimensions.set(graphDimensions);
 		if (fitView === 'resize') fitIntoView();
 	}
+	
+	function dispatchCursorEvent(name: string, e: {clientX: number; clientY: number })
+	{
+		const dims = get(dimensionsStore);
+		const s = get(scale);
+		const t = get(translation);
+		const c = calculateRelativeCursor(
+				e,
+				dims.top,
+				dims.left,
+				dims.width,
+				dims.height,
+				s,
+				t
+		);
+		console.log("Dispatching cursor event", name, "Translation", t, "Scale", s, "Dimensions",dims,"Cursor", c);
+		dispatch(name, 
+			c
+		);
+	}
 
 	function onMouseUp(e: MouseEvent | TouchEvent) {
 		if (creating) {
@@ -270,7 +292,6 @@
 				});
 		}
 		
-		dispatch('mouseup', e);
 		
 		$activeGroup = null;
 		$initialClickPosition = { x: 0, y: 0 };
@@ -537,6 +558,11 @@
 	on:touchstart|preventDefault|self={onTouchStart}
 	on:keydown={handleKeyDown}
 	on:keyup={handleKeyUp}
+	on:dragenter={e => dispatchCursorEvent("dragenter", e)}
+	on:dragleave={e => dispatchCursorEvent("dragleave", e)}
+	on:drop={e => dispatchCursorEvent("drop", e)}
+	on:mouseup={e => dispatchCursorEvent("mouseup", e)}
+	ondragover="return false"
 	bind:this={$graphDOMElement}
 	tabindex={0}
 >

@@ -146,11 +146,21 @@
 
 			graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
 
+			let firstTranslate = true;
 			unsubscribeFunctions.push(graph.transforms.translation.subscribe((translation) => {
+				if(firstTranslate) {
+					firstTranslate = false;
+					return;
+				}
 				dispatch('translate', translation);
 			}));
 			
+			let firstZoom = true;
 			unsubscribeFunctions.push(graph.transforms.scale.subscribe((scale) => {
+				if(firstZoom) {
+					firstZoom = false;
+					return;
+				}
 				dispatch('zoom', {scale});
 			}));
 			
@@ -227,6 +237,9 @@
 		{title}
 		{contrast}
 		on:edgeDrop
+		on:dragenter
+		on:dragleave
+		on:drop
 		on:mouseup
 	>
 		{#if mermaid.length}
