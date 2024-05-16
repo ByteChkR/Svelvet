@@ -11,7 +11,9 @@
 		EdgeStyle,
 		EndStyle,
 		XYPair,
-		SvelvetConnectionEvent
+		SvelvetConnectionEvent,
+		GraphTranslateEvent,
+		GraphZoomEvent
 	} from '$lib/types';
 	import type { NodeConfig, GraphKey, CSSColorString, NodeKey } from '$lib/types';
 	import type { Node, Anchor } from '$lib/types';
@@ -19,6 +21,8 @@
 
 <script lang="ts">
 	// Props
+	import {onDestroy} from "svelte";
+
 	export let mermaid = '';
 	/**
 	 * @default light
@@ -109,6 +113,8 @@
 	const dispatch = createEventDispatcher<{
 		connection: SvelvetConnectionEvent;
 		disconnection: SvelvetConnectionEvent;
+		translate: GraphTranslateEvent;
+		zoom: GraphZoomEvent
 	}>();
 
 	// let graph: GraphType;
@@ -123,6 +129,10 @@
 	setContext('edgesAboveNode', edgesAboveNode);
 	setContext('graph', graph);
 
+	const unsubscribeFunctions : Array<() => void> = [];
+	onDestroy(() => {
+		unsubscribeFunctions.forEach((fn) => fn());
+	});
 	// function to load a graph from local storage
 	// occurs after Svelvet renders
 	onMount(() => {
@@ -136,6 +146,14 @@
 
 			graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
 
+			unsubscribeFunctions.push(graph.transforms.translation.subscribe((translation) => {
+				dispatch('translate', translation);
+			}));
+			
+			unsubscribeFunctions.push(graph.transforms.scale.subscribe((scale) => {
+				dispatch('zoom', {scale});
+			}));
+			
 			graphStore.add(graph, graphKey);
 		}
 		// setContext('graph', graph)
@@ -209,6 +227,7 @@
 		{title}
 		{contrast}
 		on:edgeDrop
+		on:mouseup
 	>
 		{#if mermaid.length}
 			<FlowChart {mermaid} {mermaidConfig} />

@@ -45,10 +45,31 @@
 			console.log('No current graph found');
 		}
 	}
+	
+	let refresh = {};
+	let translation = { x: 0, y: 0 };
+	let zoom = 1;
+	function OnTranslate(e)
+	{
+		console.log("Translate", e.detail);
+		translation = e.detail;
+	}
+	function OnZoom(e)
+	{
+		console.log("Zoom", e.detail.scale);
+		zoom = e.detail.scale;
+	}
+	
+	function OnMouseUp(e)
+	{
+		console.log("Drop", e.detail);
+	}
 </script>
 
 <body>
-	<Svelvet minimap title="test" controls>
+<button on:click={() => refresh = {}}>Reload</button>
+{#key refresh}
+	<Svelvet on:mouseup={OnMouseUp} {zoom} {translation} on:zoom={OnZoom} on:translate={OnTranslate} minimap title="test" controls>
 		<!-- buttons on lower level node -->
 		<Connector />
 		<Node bgColor="red" inputs={4} position={{ x: 600, y: 200 }}>
@@ -58,8 +79,8 @@
 			{/each}
 			<!-- <button on:click={() => alert('hi')}>ALERTe</button> -->
 			<button
-				style="cursor: pointer;"
-				on:click={() => {
+					style="cursor: pointer;"
+					on:click={() => {
 					// const graph = getContext('graph');
 					console.log('Graph on user interaction:', graph);
 					getJSONState(graph);
@@ -92,6 +113,7 @@
 		<ThemeToggle slot="toggle" />
 		<ContrastTheme slot="contrast" />
 	</Svelvet>
+{/key}
 </body>
 
 <style>

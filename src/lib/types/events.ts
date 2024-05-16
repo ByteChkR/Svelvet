@@ -13,3 +13,12 @@ export interface AnchorConnectionEvent {
 	connectedNode: Node;
 	connectedAnchor: Anchor;
 }
+
+export interface GraphTranslateEvent {
+	x: number;
+	y: number;
+}
+
+export interface GraphZoomEvent {
+	scale: number;
+}
